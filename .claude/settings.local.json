@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(mv next.config.ts next.config.mjs)",
+      "Bash(sed -i 's/import type { NextConfig } from \"next\";//' next.config.mjs)",
+      "Bash(sed -i 's/const nextConfig: NextConfig = {};/const nextConfig = {};/' next.config.mjs)",
+      "Bash(npm uninstall *)"
     ]
   }
 }

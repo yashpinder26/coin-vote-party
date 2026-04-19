@@ -1,10 +1,9 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, generateRoomCode, getPlayerId } from "@/lib/supabase";
+import { db, generateRoomCode, getPlayerId } from "@/lib/firebase";
+import { ref, get, set } from "firebase/database";
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,32 +22,21 @@ export default function HomePage() {
     let code = generateRoomCode();
 
     // Ensure unique code
-    let attempts = 0;
-    while (attempts < 10) {
-      const { data } = await supabase.from("rooms").select("id").eq("code", code).single();
-      if (!data) break;
+    for (let i = 0; i < 10; i++) {
+      const snap = await get(ref(db, `rooms/${code}`));
+      if (!snap.exists()) break;
       code = generateRoomCode();
-      attempts++;
     }
 
-    const { data: room, error: roomErr } = await supabase
-      .from("rooms")
-      .insert({ code, host_player_id: playerId, status: "lobby", round: 0 })
-      .select()
-      .single();
-
-    if (roomErr || !room) {
-      setError("Failed to create room. Try again.");
-      setLoading(false);
-      return;
-    }
-
-    await supabase.from("players").upsert({
-      id: playerId,
-      room_id: room.id,
-      name: name.trim(),
-      is_host: true,
-      connected: true,
+    await set(ref(db, `rooms/${code}`), {
+      hostPlayerId: playerId,
+      status: "lobby",
+      currentQuestion: null,
+      round: 0,
+      createdAt: Date.now(),
+      players: {
+        [playerId]: { name: name.trim(), isHost: true, connected: true },
+      },
     });
 
     localStorage.setItem("coin_vote_name", name.trim());
@@ -62,24 +50,17 @@ export default function HomePage() {
     setLoading(true);
     setError("");
 
-    const { data: room } = await supabase
-      .from("rooms")
-      .select("*")
-      .eq("code", code)
-      .single();
-
-    if (!room) {
+    const snap = await get(ref(db, `rooms/${code}`));
+    if (!snap.exists()) {
       setError("Room not found. Check the code.");
       setLoading(false);
       return;
     }
 
     const playerId = getPlayerId();
-    await supabase.from("players").upsert({
-      id: playerId,
-      room_id: room.id,
+    await set(ref(db, `rooms/${code}/players/${playerId}`), {
       name: name.trim(),
-      is_host: false,
+      isHost: false,
       connected: true,
     });
 
@@ -89,7 +70,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      {/* Header */}
       <div className="text-center mb-10">
         <div className="text-6xl mb-3 select-none">🪙</div>
         <h1 className="text-4xl font-black tracking-tight text-amber-300">
@@ -100,9 +80,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Card */}
       <div className="w-full max-w-sm bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
-        {/* Name input */}
         <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
           Your Name
         </label>
