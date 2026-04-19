@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, generateRoomCode, getPlayerId } from "@/lib/firebase";
-import { ref, get, set } from "firebase/database";
+import { ref, get, set, update } from "firebase/database";
 
 export default function HomePage() {
   const router = useRouter();
@@ -33,6 +33,9 @@ export default function HomePage() {
       status: "lobby",
       currentQuestion: null,
       round: 0,
+      currentAskerIndex: 0,
+      playerOrder: [playerId],
+      revealCountdownStart: null,
       createdAt: Date.now(),
       players: {
         [playerId]: { name: name.trim(), isHost: true, connected: true },
@@ -58,10 +61,10 @@ export default function HomePage() {
     }
 
     const playerId = getPlayerId();
-    await set(ref(db, `rooms/${code}/players/${playerId}`), {
-      name: name.trim(),
-      isHost: false,
-      connected: true,
+    const currentOrder: string[] = snap.val()?.playerOrder ?? [];
+    await update(ref(db, `rooms/${code}`), {
+      [`players/${playerId}`]: { name: name.trim(), isHost: false, connected: true },
+      playerOrder: [...currentOrder, playerId],
     });
 
     localStorage.setItem("coin_vote_name", name.trim());
