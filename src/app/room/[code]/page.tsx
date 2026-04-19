@@ -357,29 +357,74 @@ export default function RoomPage() {
             const pVote = votes.find((v) => v.playerId === p.id);
             const isSelf = p.id === playerId;
             const isThisAsker = p.id === currentAskerId;
+
+            // Asker slot
             if (isThisAsker) {
               return (
                 <div key={p.id} className="flex flex-col items-center gap-1">
-                  <span className="text-xs text-amber-400 font-semibold">🎤 {p.name}</span>
-                  <div className="w-[70px] h-[70px] rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-                    <span className="text-xl">🎤</span>
+                  <span className="text-xs text-amber-400 font-semibold truncate max-w-[80px]">🎤 {p.name}</span>
+                  <div className="w-[70px] h-[70px] rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center">
+                    <span className="text-2xl">🎤</span>
                   </div>
                   <span className="text-xs text-amber-500/60">asked</span>
                 </div>
               );
             }
+
+            // Other players who haven't voted yet
+            if (!pVote) {
+              return (
+                <div key={p.id} className="flex flex-col items-center gap-1">
+                  <span className={`text-xs font-semibold truncate max-w-[80px] ${isSelf ? "text-amber-300" : "text-slate-400"}`}>
+                    #{idx + 1} {p.name}{isSelf ? " (you)" : ""}
+                  </span>
+                  <div className="w-[70px] h-[70px] rounded-full bg-slate-700/60 border border-slate-600 flex items-center justify-center">
+                    <span className="text-slate-400 text-2xl animate-pulse-slow">?</span>
+                  </div>
+                  {isSelf ? (
+                    <div className="flex gap-1 mt-1">
+                      <button onClick={() => castVote(true)} disabled={!!myVote} className="bg-green-500/20 hover:bg-green-500/40 border border-green-500/50 text-green-400 font-bold py-1 px-2 rounded-lg text-xs transition-all active:scale-95 disabled:opacity-40">YES</button>
+                      <button onClick={() => castVote(false)} disabled={!!myVote} className="bg-red-500/20 hover:bg-red-500/40 border border-red-500/50 text-red-400 font-bold py-1 px-2 rounded-lg text-xs transition-all active:scale-95 disabled:opacity-40">NO</button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-600">thinking…</span>
+                  )}
+                </div>
+              );
+            }
+
+            // Self after voting — show own coin covered
+            if (isSelf && pVote) {
+              return (
+                <CoinCard
+                  key={p.id}
+                  playerName={`#${idx + 1} ${p.name}`}
+                  playerIndex={idx}
+                  hasVoted={true}
+                  vote={pVote.vote}
+                  revealed={false}
+                  isSelf={true}
+                  disabled={true}
+                />
+              );
+            }
+
+            // Other players who voted — locked coin, no YES/NO visible
             return (
-              <CoinCard
-                key={p.id}
-                playerName={`#${idx + 1} ${p.name}`}
-                playerIndex={idx}
-                hasVoted={!!pVote}
-                vote={isSelf && pVote ? pVote.vote : null}
-                revealed={false}
-                isSelf={isSelf}
-                onVote={castVote}
-                disabled={!!myVote || isAsker}
-              />
+              <div key={p.id} className="flex flex-col items-center gap-1">
+                <span className="text-xs text-slate-400 truncate max-w-[80px]">#{idx + 1} {p.name}</span>
+                <div
+                  className="w-[70px] h-[70px] rounded-full flex items-center justify-center"
+                  style={{
+                    background: "radial-gradient(circle at 35% 35%, #6b7280, #4b5563 50%, #374151)",
+                    border: "3px solid #6b7280",
+                    boxShadow: "inset -3px -3px 6px rgba(0,0,0,0.4), inset 2px 2px 4px rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <span className="text-2xl">🔒</span>
+                </div>
+                <span className="text-xs text-slate-500">voted ✓</span>
+              </div>
             );
           })}
         </div>
