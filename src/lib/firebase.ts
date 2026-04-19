@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,6 +11,9 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 export const db = getDatabase(app);
+export const auth = getAuth(app);
+
+export const ADMIN_EMAIL = "yashpindersaini@gmail.com";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 
@@ -22,6 +26,8 @@ export function generateRoomCode(): string {
 
 export function getPlayerId(): string {
   if (typeof window === "undefined") return "";
+  // Use Firebase Auth UID as player ID when signed in
+  if (auth.currentUser) return auth.currentUser.uid;
   let id = localStorage.getItem("coin_vote_player_id");
   if (!id) {
     id = crypto.randomUUID();
