@@ -19,6 +19,34 @@ interface RoomData {
   votes: Record<string, { vote: boolean; round: number }>;
 }
 
+function AnonymousCoin({ vote, index }: { vote: boolean; index: number }) {
+  const colors = ["bg-red-500","bg-blue-500","bg-emerald-500","bg-purple-500","bg-orange-500","bg-pink-500","bg-cyan-500","bg-yellow-500"];
+  const hk = colors[index % colors.length];
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative" style={{ width: 70, height: 70 }}>
+        <div className="coin-scene" style={{ width: 70, height: 70 }}>
+          <div className={`coin-inner ${!vote ? "flipped" : ""}`} style={{ width: 70, height: 70 }}>
+            <div className="coin-face front" style={{ fontSize: "1.2rem" }}>
+              <span>十</span>
+              <span style={{ fontSize: "0.6rem", fontWeight: 900, color: "#78350f" }}>YES</span>
+              <div className="coin-rim" />
+            </div>
+            <div className="coin-face back" style={{ fontSize: "1.2rem" }}>
+              <span>円</span>
+              <span style={{ fontSize: "0.6rem", fontWeight: 900, color: "#78350f" }}>NO</span>
+              <div className="coin-rim" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <span className={`text-xs font-bold px-2 py-0.5 rounded-full animate-fade-in-scale ${vote ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+        {vote ? "YES" : "NO"}
+      </span>
+    </div>
+  );
+}
+
 export default function RoomPage() {
   const { code } = useParams<{ code: string }>();
   const router = useRouter();
@@ -310,21 +338,11 @@ export default function RoomPage() {
           </div>
         </div>
 
-        <div className="w-full grid grid-cols-3 gap-6 mb-8 place-items-center sm:grid-cols-4">
-          {players.map((p, idx) => {
-            const pVote = votes.find((v) => v.playerId === p.id);
-            return (
-              <CoinCard
-                key={p.id}
-                playerName={p.name}
-                playerIndex={idx}
-                hasVoted={!!pVote}
-                vote={pVote?.vote ?? null}
-                revealed={true}
-                isSelf={p.id === playerId}
-              />
-            );
-          })}
+        {/* Anonymous coins — shuffled so you can't match name to vote */}
+        <div className="w-full grid grid-cols-4 gap-4 mb-8 place-items-center sm:grid-cols-5">
+          {[...votes].sort(() => Math.random() - 0.5).map((v, idx) => (
+            <AnonymousCoin key={v.playerId} vote={v.vote} index={idx} />
+          ))}
         </div>
 
         {yesCount !== noCount && (
