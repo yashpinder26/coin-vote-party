@@ -211,7 +211,7 @@ export default function RoomPage() {
               placeholder="e.g. Would you rather live in a foreign country?"
               rows={3}
               maxLength={200}
-              className="w-full bg-white/8 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition resize-none"
+              className="w-full bg-slate-800 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition resize-none"
             />
             <button
               onClick={startRound}

@@ -90,7 +90,7 @@ export default function HomePage() {
           onChange={(e) => { setName(e.target.value); setError(""); }}
           placeholder="e.g. Yuki"
           maxLength={20}
-          className="w-full bg-white/8 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition mb-5"
+          className="w-full bg-slate-800 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition mb-5"
         />
 
         {mode === "home" && (
@@ -123,7 +123,7 @@ export default function HomePage() {
                 onChange={(e) => { setJoinCode(e.target.value.toUpperCase()); setError(""); }}
                 placeholder="ABCD"
                 maxLength={4}
-                className="w-full bg-white/8 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-center text-2xl font-mono font-black tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition"
+                className="w-full bg-slate-800 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-center text-2xl font-mono font-black tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition"
               />
             </div>
             <button
