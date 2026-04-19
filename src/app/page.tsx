@@ -5,9 +5,15 @@ import { useRouter } from "next/navigation";
 import { db, generateRoomCode, getPlayerId } from "@/lib/firebase";
 import { ref, get, set, update } from "firebase/database";
 
+function getSession() {
+  if (typeof window === "undefined") return null;
+  try { return JSON.parse(localStorage.getItem("coin_vote_session") ?? "null"); } catch { return null; }
+}
+
 export default function HomePage() {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const session = getSession();
+  const [name, setName] = useState(session?.displayName ?? "");
   const [joinCode, setJoinCode] = useState("");
   const [mode, setMode] = useState<"home" | "join">("home");
   const [loading, setLoading] = useState(false);
@@ -81,6 +87,17 @@ export default function HomePage() {
         <p className="text-slate-400 mt-2 text-sm">
           Vote yes or no — hidden under a handkerchief!
         </p>
+        {session && (
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <span className="text-slate-400 text-xs">Signed in as <span className="text-amber-300 font-semibold">{session.displayName}</span></span>
+            <button
+              onClick={() => { localStorage.removeItem("coin_vote_session"); localStorage.removeItem("coin_vote_player_id"); window.location.reload(); }}
+              className="text-slate-600 hover:text-slate-400 text-xs transition"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="w-full max-w-sm bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
