@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
   signOut,
   User,
@@ -17,10 +16,6 @@ type Status = "loading" | "signed_out" | "pending" | "approved" | "denied" | "ad
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    getRedirectResult(auth).catch(() => {});
-  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -48,7 +43,11 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function signIn() {
-    await signInWithRedirect(auth, new GoogleAuthProvider());
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch {
+      // user closed popup
+    }
   }
 
   function handleSignOut() {
